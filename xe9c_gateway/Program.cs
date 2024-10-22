@@ -6,7 +6,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        Xe9c_gateway x = new("127.0.0.1", 5555);
+        Xe9c_gateway x = new(args[0], int.Parse(args[1]));
         Console.WriteLine(x.GatewayInfo());
         Socket s = x.CreateGateway();
 
