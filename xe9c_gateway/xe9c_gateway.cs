@@ -60,10 +60,21 @@ public class Xe9c_gateway
 
     public byte[] ReceiveMsg(Socket __socket)
     {
-        byte[] getMsg = new byte[2048];
-        __socket.Receive(getMsg);
+        try
+        {
+            byte[] getMsg = new byte[2048];
+            __socket.Receive(getMsg);
 
-        return getMsg;
+            return getMsg;
+        }
+        catch (SocketException)
+        {
+            return Encoding.UTF8.GetBytes($"[INFO] Client disconnected");
+        }
+        catch (Exception ex)
+        {
+            return Encoding.UTF8.GetBytes($"[ERROR] {ex.Message}");
+        }
     }
 
     public void BroadcastMsg(Socket __sender, byte[] msg)
@@ -77,11 +88,12 @@ public class Xe9c_gateway
 
     public void HandleClient(Socket __socket)
     {
-        while (true)
+        while (__socket.Connected)
         {
             byte[] buffer = ReceiveMsg(__socket);
-            Console.WriteLine("Received message: " + Encoding.UTF8.GetString(buffer));
             BroadcastMsg(__socket, buffer);
         }
+        RemoveClient(__socket);
+        __socket.Close();
     }
 }
