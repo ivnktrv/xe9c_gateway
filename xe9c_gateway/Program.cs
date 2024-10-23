@@ -14,7 +14,7 @@ internal class Program
         {
             Socket clientSocket = s.Accept();
             string getClientName = gateway.GetClientName(clientSocket);
-            Console.WriteLine($"[{DateTime.Now}] [+] Connected client: {getClientName} ({clientSocket.RemoteEndPoint})");
+            Console.WriteLine($"[{DateTime.Now}] [+] Connected client: {getClientName}");
             gateway.AddClient(getClientName, clientSocket);
             Task.Run(() => { gateway.HandleClient(clientSocket); });
         }
