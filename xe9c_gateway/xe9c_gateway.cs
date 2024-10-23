@@ -108,20 +108,27 @@ public class Xe9c_gateway
     // обслуживание клиента
     public void HandleClient(Socket __socket)
     {
-        BroadcastMsg(
-            __socket, 
-            Encoding.UTF8.GetBytes(
-                $"[INFO] Client connected: {_connectedClients[__socket]}"
-                )
-            );
-        while (__socket.Connected)
+        try
         {
-            byte[] buffer = ReceiveMsg(__socket);
-            BroadcastMsg(__socket, buffer);
+            BroadcastMsg(
+                __socket,
+                Encoding.UTF8.GetBytes(
+                    $"[INFO] Client connected: {_connectedClients[__socket]}"
+                    )
+                );
+            while (__socket.Connected)
+            {
+                byte[] buffer = ReceiveMsg(__socket);
+                BroadcastMsg(__socket, buffer);
+            }
+            Console.WriteLine($"[{DateTime.Now}] [i] Client disconnected: {_connectedClients[__socket]}");
+            RemoveClient(__socket);
+            __socket.Close();
         }
-        Console.WriteLine($"[{DateTime.Now}] [i] Client disconnected: {_connectedClients[__socket]}");
-        RemoveClient(__socket);
-        __socket.Close();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{DateTime.Now}] [ERROR] {ex}");
+        }
     }
 
     public string GetClientName(Socket __socket)
