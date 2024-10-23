@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 namespace xe9c_gateway;
 
 public class Xe9c_gateway
-{
-    private List<Socket> _connectedClients = new();
+{       // список подключённых клиентов (вид: { сокет, имя_клиента })
+    private Dictionary<Socket, string> _connectedClients = new();
     private string _ip = "127.0.0.1";
     private int _port = 32768;
 
@@ -33,14 +33,34 @@ public class Xe9c_gateway
         _port = port;
     }
 
-    public string GatewayInfo()
+    public string GatewayInfo() // информация о шлюзе
     {
-        return $"### GATEWAY INFO ###\n\nIP: {_ip}\nPort: {_port}";
+        return $"""
+         ┌─────┐             ___      ___           _____
+         │     │             \  \    /  /          /     \
+         └──┬──┘              \  \  /  /   _____   |  O  |   ____
+           ─┴─ \__ ┌──────┐    \  \/  /   /  _  \  \___  |  /  __|
+                   |-   "'|    /  /\  \   |  ___/      | |  | /
+                   └──────┘   /  /  \  \  |  \__   ____/ /  | \__
+                     |       /__/    \__\  \____|  |____/   \____|
+                      \
+                     ┌─────┐      GATEWAY (v1.0)
+                     │     │
+                     └──┬──┘
+                       ─┴─
+                           
+         GATEWAY INFO
+        ┌────────────────
+        |
+        ├─ IP: {_ip}
+        ├─ Port: {_port}
+        
+        [{DateTime.Now}] [...] Waiting for connection
+        """;
     }
-
-    public void AddClient(Socket client)
+    public void AddClient(string clientName, Socket client)
     {
-        _connectedClients.Add(client);
+        _connectedClients.Add(client, clientName);
     }
     public void RemoveClient(Socket client)
     {
@@ -49,7 +69,7 @@ public class Xe9c_gateway
 
     public Socket CreateGateway()
     {
-        IPEndPoint ipEndPoint = new(IPAddress.Parse(_ip), _port);
+        IPEndPoint ipEndPoint = new(IPAddress.Any, _port);
         Socket __socket = new(
             AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         __socket.Bind(ipEndPoint);
@@ -57,7 +77,7 @@ public class Xe9c_gateway
 
         return __socket;
     }
-
+    // ожидание сообщения
     public byte[] ReceiveMsg(Socket __socket)
     {
         try
@@ -69,31 +89,46 @@ public class Xe9c_gateway
         }
         catch (SocketException)
         {
-            return Encoding.UTF8.GetBytes($"[INFO] Client disconnected");
+            return Encoding.UTF8.GetBytes($"[INFO] Client disconnected: {_connectedClients[__socket]}");
         }
         catch (Exception ex)
         {
             return Encoding.UTF8.GetBytes($"[ERROR] {ex.Message}");
         }
     }
-
+    // отправка сообщения подключённым клиентам
     public void BroadcastMsg(Socket __sender, byte[] msg)
     {
-        foreach (Socket client in _connectedClients)
+        foreach (var client in _connectedClients)
         {
-            if (client == __sender) continue;
-            client.Send(msg);
+            if (client.Key == __sender) continue;
+            client.Key.Send(msg);
         }
     }
-
+    // обслуживание клиента
     public void HandleClient(Socket __socket)
     {
+        BroadcastMsg(
+            __socket, 
+            Encoding.UTF8.GetBytes(
+                $"[INFO] Client connected: {_connectedClients[__socket]}"
+                )
+            );
         while (__socket.Connected)
         {
             byte[] buffer = ReceiveMsg(__socket);
             BroadcastMsg(__socket, buffer);
         }
+        Console.WriteLine($"[{DateTime.Now}] [i] Client disconnected: {_connectedClients[__socket]}");
         RemoveClient(__socket);
         __socket.Close();
+    }
+
+    public string GetClientName(Socket __socket)
+    {
+        byte[] getName = new byte[32]; 
+        __socket.Receive(getName);
+
+        return Encoding.UTF8.GetString(getName);
     }
 }

@@ -6,17 +6,17 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        Xe9c_gateway x = new(args[0], int.Parse(args[1]));
-        Console.WriteLine(x.GatewayInfo());
-        Socket s = x.CreateGateway();
+        Xe9c_gateway gateway = new(args[1], int.Parse(args[2]));
+        Console.WriteLine(gateway.GatewayInfo());
+        Socket s = gateway.CreateGateway();
 
         while (true)
         {
             Socket clientSocket = s.Accept();
-            Console.WriteLine("Connected client: "+clientSocket.RemoteEndPoint);
-            x.AddClient(clientSocket);
-            Task.Run(() => { x.HandleClient(clientSocket); });
+            string getClientName = gateway.GetClientName(clientSocket);
+            Console.WriteLine($"[{DateTime.Now}] [+] Connected client: {getClientName} ({clientSocket.RemoteEndPoint})");
+            gateway.AddClient(getClientName, clientSocket);
+            Task.Run(() => { gateway.HandleClient(clientSocket); });
         }
-        
     }
 }
