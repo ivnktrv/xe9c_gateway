@@ -44,7 +44,7 @@ public class Xe9c_gateway
                    └──────┘   /  /  \  \  |  \__   ____/ /  | \__
                      |       /__/    \__\  \____|  |____/   \____|
                       \
-                     ┌─────┐      GATEWAY (v1.0)
+                     ┌─────┐      GATEWAY (v1.1)
                      │     │
                      └──┬──┘
                        ─┴─
@@ -89,7 +89,7 @@ public class Xe9c_gateway
         }
         catch (SocketException)
         {
-            return Encoding.UTF8.GetBytes($"[INFO] Client disconnected: {_connectedClients[__socket]}");
+            return Encoding.UTF8.GetBytes($"[INFO] Клиент отключился: {_connectedClients[__socket]}");
         }
         catch (Exception ex)
         {
@@ -97,11 +97,11 @@ public class Xe9c_gateway
         }
     }
     // отправка сообщения подключённым клиентам
-    public void BroadcastMsg(Socket __sender, byte[] msg)
+    public void BroadcastMsg(Socket __socket, byte[] msg)
     {
         foreach (var client in _connectedClients)
         {
-            if (client.Key == __sender) continue;
+            if (client.Key == __socket) continue;
             client.Key.Send(msg);
         }
     }
@@ -113,7 +113,7 @@ public class Xe9c_gateway
             BroadcastMsg(
                 __socket,
                 Encoding.UTF8.GetBytes(
-                    $"[INFO] Client connected: {_connectedClients[__socket]}"
+                    $"[INFO] Подключён клиент: {_connectedClients[__socket]}"
                     )
                 );
             while (__socket.Connected)
