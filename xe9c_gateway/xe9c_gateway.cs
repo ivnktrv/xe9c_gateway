@@ -10,10 +10,16 @@ namespace xe9c_gateway;
 
 public class Xe9c_gateway
 {       // список подключённых клиентов (вид: { сокет, имя_клиента })
-    private Dictionary<Socket, string> _connectedClients = new();
+    private Dictionary<Socket, string> _connectedClients = [];
+    private string _gatewayName = "None";
     private string _ip = "127.0.0.1";
     private int _port = 32768;
 
+    public string GatewayName
+    {
+        get => _gatewayName;
+        set { if (value != null) _gatewayName = value; }
+    }
     public string IP
     {
         get => _ip;
@@ -27,8 +33,9 @@ public class Xe9c_gateway
 
     public Xe9c_gateway() { }
 
-    public Xe9c_gateway(string ip, int port)
+    public Xe9c_gateway(string gatewayName, string ip, int port)
     {
+        _gatewayName = gatewayName;
         _ip = ip;
         _port = port;
     }
@@ -44,14 +51,15 @@ public class Xe9c_gateway
                    └──────┘   /  /  \  \  |  \__   ____/ /  | \__
                      |       /__/    \__\  \____|  |____/   \____|
                       \
-                     ┌─────┐      GATEWAY (v1.1)
+                     ┌─────┐      GATEWAY (v1.2)
                      │     │
                      └──┬──┘
                        ─┴─
                            
          GATEWAY INFO
         ┌────────────────
-        |
+        │
+        ├─ Name: {_gatewayName}
         ├─ IP: {_ip}
         ├─ Port: {_port}
         
@@ -130,12 +138,18 @@ public class Xe9c_gateway
             Console.WriteLine($"[{DateTime.Now}] [ERROR] {ex}");
         }
     }
-
+    // получение имени клиента
     public string GetClientName(Socket __socket)
     {
         byte[] getName = new byte[32]; 
         __socket.Receive(getName);
 
         return Encoding.UTF8.GetString(getName);
+    }
+    // отправка имени шлюза
+    public void SendGatewayName(Socket __socket)
+    {
+        byte[] sendName = Encoding.UTF8.GetBytes(_gatewayName);
+        __socket.Send(sendName);
     }
 }

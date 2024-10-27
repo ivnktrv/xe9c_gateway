@@ -2,7 +2,7 @@
   "profiles": {
     "xe9c_gateway": {
       "commandName": "Project",
-      "commandLineArgs": "xe9c_gateway 192.168.1.197 5555"
+      "commandLineArgs": "xe9c_gateway gateway01 192.168.1.197 5555"
     }
   }
 }
