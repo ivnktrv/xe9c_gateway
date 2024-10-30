@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -56,14 +57,14 @@ public class Xe9c_gateway
                      └──┬──┘
                        ─┴─
                            
-         GATEWAY INFO
+         ИНФА О ШЛЮЗЕ
         ┌────────────────
         │
-        ├─ Name: {_gatewayName}
+        ├─ Имя: {_gatewayName}
         ├─ IP: {_ip}
-        ├─ Port: {_port}
+        ├─ Порт: {_port}
         
-        [{DateTime.Now}] [...] Waiting for connection
+        [{DateTime.Now}] [...] Ожидаю подключений
         """;
     }
     public void AddClient(string clientName, Socket client)
@@ -110,7 +111,15 @@ public class Xe9c_gateway
         foreach (var client in _connectedClients)
         {
             if (client.Key == __socket) continue;
-            client.Key.Send(msg);
+            try
+            {
+                client.Key.Send(msg);
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine($"[{DateTime.Now}] [i] Была попытка отправить сообщение несуществующему клиенту. Удаляю клиента из списка (Подробнее: {ex.Message})");
+                RemoveClient(client.Key);
+            }
         }
     }
     // обслуживание клиента
@@ -129,7 +138,7 @@ public class Xe9c_gateway
                 byte[] buffer = ReceiveMsg(__socket);
                 BroadcastMsg(__socket, buffer);
             }
-            Console.WriteLine($"[{DateTime.Now}] [i] Client disconnected: {_connectedClients[__socket]}");
+            Console.WriteLine($"[{DateTime.Now}] [i] Клиент отключился: {_connectedClients[__socket]}");
             RemoveClient(__socket);
             __socket.Close();
         }
