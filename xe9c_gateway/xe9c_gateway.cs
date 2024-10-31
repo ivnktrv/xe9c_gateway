@@ -41,7 +41,10 @@ public class Xe9c_gateway
         _port = port;
     }
 
-    public string GatewayInfo() // информация о шлюзе
+    /// <summary>
+    /// Информация о шлюзе
+    /// </summary>
+    public virtual string GatewayInfo()
     {
         return $"""
          ┌─────┐             ___      ___           _____
@@ -67,15 +70,30 @@ public class Xe9c_gateway
         [{DateTime.Now}] [...] Ожидаю подключений
         """;
     }
+
+    /// <summary>
+    /// Добавить клиента в список подключённых клиентов
+    /// </summary>
+    /// <param name="clientName"></param>
+    /// <param name="client"></param>
     public void AddClient(string clientName, Socket client)
     {
         _connectedClients.Add(client, clientName);
     }
-    public void RemoveClient(Socket client)
+
+    /// <summary>
+    /// Удалить клиента из списка подключённых клиентов
+    /// </summary>
+    /// <param name="client"></param>
+    protected void RemoveClient(Socket client)
     {
         _connectedClients.Remove(client);
     }
 
+    /// <summary>
+    /// Создание сокета
+    /// </summary>
+    /// <returns>Созданный сокет шлюза</returns>
     public Socket CreateGateway()
     {
         IPEndPoint ipEndPoint = new(IPAddress.Any, _port);
@@ -86,8 +104,13 @@ public class Xe9c_gateway
 
         return __socket;
     }
-    // ожидание сообщения
-    public byte[] ReceiveMsg(Socket __socket)
+
+    /// <summary>
+    /// Принятие сообщения от клиента
+    /// </summary>
+    /// <param name="__socket"></param>
+    /// <returns>Полученное сообщение в виде массива байтов</returns>
+    protected virtual byte[] ReceiveMsg(Socket __socket)
     {
         try
         {
@@ -105,8 +128,13 @@ public class Xe9c_gateway
             return Encoding.UTF8.GetBytes($"[ERROR] {ex.Message}");
         }
     }
-    // отправка сообщения подключённым клиентам
-    public void BroadcastMsg(Socket __socket, byte[] msg)
+
+    /// <summary>
+    /// Отправка сообщения подключённым клиентам
+    /// </summary>
+    /// <param name="__socket"></param>
+    /// <param name="msg"></param>
+    protected virtual void BroadcastMsg(Socket __socket, byte[] msg)
     {
         foreach (Socket client in _connectedClients.Keys.ToList())
         {
@@ -122,8 +150,11 @@ public class Xe9c_gateway
             }
         }
     }
-    // обслуживание клиента
-    public void HandleClient(Socket __socket)
+
+    /// <summary>
+    /// Обслуживание клиента
+    /// </summary>
+    public virtual void HandleClient(Socket __socket)
     {
         try
         {
@@ -147,16 +178,23 @@ public class Xe9c_gateway
             Console.WriteLine($"[{DateTime.Now}] [ERROR] {ex}");
         }
     }
-    // получение имени клиента
-    public string GetClientName(Socket __socket)
+
+    /// <summary>
+    /// Получить имя клиента
+    /// </summary>
+    /// <returns>Имя клиента в виде строки (string)</returns>
+    public virtual string GetClientName(Socket __socket)
     {
         byte[] getName = new byte[32]; 
         __socket.Receive(getName);
 
         return Encoding.UTF8.GetString(getName);
     }
-    // отправка имени шлюза
-    public void SendGatewayName(Socket __socket)
+
+    /// <summary>
+    /// Отправить имя шлюза
+    /// </summary>
+    public virtual void SendGatewayName(Socket __socket)
     {
         byte[] sendName = Encoding.UTF8.GetBytes(_gatewayName);
         __socket.Send(sendName);
