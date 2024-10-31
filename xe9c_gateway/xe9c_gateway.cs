@@ -108,17 +108,17 @@ public class Xe9c_gateway
     // отправка сообщения подключённым клиентам
     public void BroadcastMsg(Socket __socket, byte[] msg)
     {
-        foreach (var client in _connectedClients)
+        foreach (Socket client in _connectedClients.Keys.ToList())
         {
-            if (client.Key == __socket) continue;
+            if (client == __socket) continue;
             try
             {
-                client.Key.Send(msg);
+                client.Send(msg);
             }
             catch (SocketException ex)
             {
                 Console.WriteLine($"[{DateTime.Now}] [i] Была попытка отправить сообщение несуществующему клиенту. Удаляю клиента из списка (Подробнее: {ex.Message})");
-                RemoveClient(client.Key);
+                RemoveClient(client);
             }
         }
     }
