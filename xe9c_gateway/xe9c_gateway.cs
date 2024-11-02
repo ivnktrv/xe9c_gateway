@@ -214,6 +214,7 @@ public class Xe9c_gateway
             case 10: return getIP[..^6];
             case 12: return getIP[..^8];
             case 13: return getIP[..^8];
+            case 14: return getIP[..^9];
             case 15: return getIP[..^9];
             default: return getIP[..^6];
         }
