@@ -31,7 +31,7 @@ internal class Program
             // проверяем, является ли это http подключением
             if (getClientName.Contains("HTTP"))
             {
-                Console.WriteLine($"[{DateTime.Now}] [!] Была попытка подключения по http (полученное имя: {getClientName[..^3]}***). Клиент забанен на 1 мин.");
+                Console.WriteLine($"[{DateTime.Now}] [!] Была попытка подключения по http (полученное имя: {getClientName}). Клиент ({clientSocketAddress.ToString()[..^5]}***) забанен на 1 мин.");
                 gateway._bannedIPs.Add(clientSocketAddress);
                 // в бан на 1 минуту
                 Task.Run(() =>
