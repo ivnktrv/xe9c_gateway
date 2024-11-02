@@ -203,4 +203,19 @@ public class Xe9c_gateway
         byte[] sendName = Encoding.UTF8.GetBytes(_gatewayName);
         __socket.Send(sendName);
     }
+    public string HideIP(IPAddress ip)
+    {
+        string getIP = ip.ToString();
+        switch (getIP.Length)
+        {
+            case 7: return getIP[..^4];
+            case 8: return getIP[..^5];
+            case 9: return getIP[..^6];
+            case 10: return getIP[..^6];
+            case 12: return getIP[..^8];
+            case 13: return getIP[..^8];
+            case 15: return getIP[..^9];
+            default: return getIP[..^6];
+        }
+    }
 }

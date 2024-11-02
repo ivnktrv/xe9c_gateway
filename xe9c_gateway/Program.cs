@@ -31,14 +31,14 @@ internal class Program
             // проверяем, является ли это http подключением
             if (getClientName.Contains("HTTP"))
             {
-                Console.WriteLine($"[{DateTime.Now}] [!] Была попытка подключения по http (полученное имя: {getClientName}). Клиент ({clientSocketAddress.ToString()[..^5]}***) забанен на 1 мин.");
+                Console.WriteLine($"[{DateTime.Now}] [!] Была попытка подключения по http (полученное имя: {getClientName}). Клиент ({gateway.HideIP(clientSocketAddress)}***) забанен на 1 мин.");
                 gateway._bannedIPs.Add(clientSocketAddress);
                 // в бан на 1 минуту
                 Task.Run(() =>
                 {
                     Thread.Sleep(60000);
                     gateway._bannedIPs.Remove(clientSocketAddress);
-                    Console.WriteLine($"[{DateTime.Now}] [i] Клиент разбанен: {clientSocketAddress.ToString()[..^5]}***");
+                    Console.WriteLine($"[{DateTime.Now}] [i] Клиент разбанен: {gateway.HideIP(clientSocketAddress)}***");
                 });
                 clientSocket.Close();
                 clientSocket.Dispose();
