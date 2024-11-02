@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 
 namespace xe9c_gateway;
 
@@ -18,7 +19,31 @@ internal class Program
         while (true)
         {
             Socket clientSocket = s.Accept();
+            IPAddress clientSocketAddress = ((IPEndPoint)clientSocket.RemoteEndPoint).Address;
+            // если клиент в списке бана, отключаем его
+            if (gateway._bannedIPs.Contains(clientSocketAddress))
+            {
+                clientSocket.Close();
+                clientSocket.Dispose();
+                continue;
+            }
             string getClientName = gateway.GetClientName(clientSocket);
+            // проверяем, является ли это http подключением
+            if (getClientName.Contains("HTTP"))
+            {
+                Console.WriteLine($"[{DateTime.Now}] [!] Была попытка подключения по http (полученное имя: {getClientName[..^3]}***). Клиент забанен на 1 мин.");
+                gateway._bannedIPs.Add(clientSocketAddress);
+                // в бан на 1 минуту
+                Task.Run(() =>
+                {
+                    Thread.Sleep(60000);
+                    gateway._bannedIPs.Remove(clientSocketAddress);
+                    Console.WriteLine($"[{DateTime.Now}] [i] Клиент разбанен: {clientSocketAddress.ToString()[..^5]}***");
+                });
+                clientSocket.Close();
+                clientSocket.Dispose();
+                continue;
+            }
             gateway.SendGatewayName(clientSocket);
             Console.WriteLine($"[{DateTime.Now}] [+] Подключён клиент: {getClientName}");
             gateway.AddClient(getClientName, clientSocket);

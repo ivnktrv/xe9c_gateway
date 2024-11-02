@@ -10,8 +10,11 @@ using System.Threading.Tasks;
 namespace xe9c_gateway;
 
 public class Xe9c_gateway
-{       // список подключённых клиентов (вид: { сокет, имя_клиента })
-    private Dictionary<Socket, string> _connectedClients = [];
+{   /// <summary>
+    /// список подключённых клиентов (вид: { сокет, имя_клиента })
+    /// </summary>
+    private readonly Dictionary<Socket, string> _connectedClients = [];
+    public List<IPAddress> _bannedIPs = [];
     private string _gatewayName = "None";
     private string _ip = "127.0.0.1";
     private int _port = 32768;
@@ -55,7 +58,7 @@ public class Xe9c_gateway
                    └──────┘   /  /  \  \  |  \__   ____/ /  | \__
                      |       /__/    \__\  \____|  |____/   \____|
                       \
-                     ┌─────┐      GATEWAY (v1.2)
+                     ┌─────┐      GATEWAY (v2.0)
                      │     │
                      └──┬──┘
                        ─┴─
@@ -85,7 +88,7 @@ public class Xe9c_gateway
     /// Удалить клиента из списка подключённых клиентов
     /// </summary>
     /// <param name="client"></param>
-    protected void RemoveClient(Socket client)
+    public void RemoveClient(Socket client)
     {
         _connectedClients.Remove(client);
     }
@@ -96,7 +99,7 @@ public class Xe9c_gateway
     /// <returns>Созданный сокет шлюза</returns>
     public Socket CreateGateway()
     {
-        IPEndPoint ipEndPoint = new(IPAddress.Any, _port);
+        IPEndPoint ipEndPoint = new(IPAddress.Parse(_ip), _port);
         Socket __socket = new(
             AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         __socket.Bind(ipEndPoint);
@@ -110,7 +113,7 @@ public class Xe9c_gateway
     /// </summary>
     /// <param name="__socket"></param>
     /// <returns>Полученное сообщение в виде массива байтов</returns>
-    protected virtual byte[] ReceiveMsg(Socket __socket)
+    private protected virtual byte[] ReceiveMsg(Socket __socket)
     {
         try
         {
@@ -134,7 +137,7 @@ public class Xe9c_gateway
     /// </summary>
     /// <param name="__socket"></param>
     /// <param name="msg"></param>
-    protected virtual void BroadcastMsg(Socket __socket, byte[] msg)
+    private protected virtual void BroadcastMsg(Socket __socket, byte[] msg)
     {
         foreach (Socket client in _connectedClients.Keys.ToList())
         {
@@ -152,7 +155,8 @@ public class Xe9c_gateway
     }
 
     /// <summary>
-    /// Обслуживание клиента
+    /// Обслуживание клиента. То есть ожидаем сообщение от него и это сообщение
+    /// отправляем всем подключённым клиентам
     /// </summary>
     public virtual void HandleClient(Socket __socket)
     {
