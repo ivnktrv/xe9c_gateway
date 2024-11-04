@@ -106,7 +106,7 @@ public class Xe9c_gateway
             AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         __socket.Bind(ipEndPoint);
         __socket.Listen();
-        _log.Logging("Шлюз инициализирован", Xe9cLog.LoggingLevel.Info);
+        _log.Logging("Шлюз инициализирован", LoggingLevel.Info);
 
         return __socket;
     }
@@ -151,13 +151,15 @@ public class Xe9c_gateway
             }
             catch (SocketException ex)
             {
-                _log.Logging($"Была попытка отправить сообщение несуществующему клиенту. Удаляю клиента из списка (Подробнее: {ex})", Xe9cLog.LoggingLevel.Warning);
+                _log.Logging(
+                    $"Была попытка отправить сообщение несуществующему клиенту. Удаляю клиента из списка (Подробнее: {ex})",
+                    LoggingLevel.Warning);
                 RemoveClient(client);
                 _log.Frame(_connectedClients);
             }
             catch (Exception ex)
             {
-                _log.Logging($"{ex}", Xe9cLog.LoggingLevel.Error);
+                _log.Logging($"{ex}", LoggingLevel.Error);
                 RemoveClient(client);
                 _log.Frame(_connectedClients);
             }
@@ -184,14 +186,16 @@ public class Xe9c_gateway
                 byte[] buffer = ReceiveMsg(__socket);
                 BroadcastMsg(__socket, buffer);
             }
-            _log.Logging($"Клиент отключился: {_connectedClients[__socket]}", Xe9cLog.LoggingLevel.Info);
+            _log.Logging($"Клиент отключился: {_connectedClients[__socket]}", 
+                LoggingLevel.Info
+            );
             RemoveClient(__socket);
             __socket.Close();
             _log.Frame(_connectedClients);
         }
         catch (Exception ex)
         {
-            _log.Logging($"{ex}", Xe9cLog.LoggingLevel.Error);
+            _log.Logging($"{ex}", LoggingLevel.Error);
             RemoveClient(__socket);
             _log.Frame(_connectedClients);
         }

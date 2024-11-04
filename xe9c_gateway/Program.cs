@@ -33,21 +33,27 @@ internal class Program
             // проверяем, является ли это http подключением
             if (getClientName.Contains("HTTP"))
             {
-                log.Logging($"Была попытка подключения по http (полученное имя: {getClientName}). Клиент ({gateway.HideIP(clientSocketAddress)}***) забанен на 1 мин.", Xe9cLog.LoggingLevel.Warning);
+                log.Logging(
+                    "Была попытка подключения по http (полученное имя: {getClientName}). Клиент ({gateway.HideIP(clientSocketAddress)}***) забанен на 1 мин.", 
+                    LoggingLevel.Warning
+                );
                 gateway._bannedIPs.Add(clientSocketAddress);
                 // в бан на 1 минуту
                 Task.Run(() =>
                 {
                     Thread.Sleep(60000);
                     gateway._bannedIPs.Remove(clientSocketAddress);
-                    log.Logging($"Клиент разбанен: {gateway.HideIP(clientSocketAddress)}***", Xe9cLog.LoggingLevel.Info);
+                    log.Logging(
+                        $"Клиент разбанен: {gateway.HideIP(clientSocketAddress)}***",
+                        LoggingLevel.Info
+                    );
                 });
                 clientSocket.Close();
                 clientSocket.Dispose();
                 continue;
             }
             gateway.SendGatewayName(clientSocket);
-            log.Logging($"Подключён клиент: {getClientName}", Xe9cLog.LoggingLevel.Info);
+            log.Logging($"Подключён клиент: {getClientName}", LoggingLevel.Info);
             gateway.AddClient(getClientName, clientSocket);
             Task.Run(() => { gateway.HandleClient(clientSocket); });
         }

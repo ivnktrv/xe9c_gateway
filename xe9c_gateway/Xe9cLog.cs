@@ -19,8 +19,7 @@ public readonly struct Xe9cLog
     {
         if (!Directory.Exists("logs")) Directory.CreateDirectory("logs");
     }
-
-    #region function Logging()
+    
     /// <summary>
     /// Записать событие в файл
     /// </summary>
@@ -51,18 +50,6 @@ public readonly struct Xe9cLog
     }
 
     /// <summary>
-    /// Серьёзность событий
-    /// </summary>
-    public enum LoggingLevel
-    {
-        Info,
-        Warning,
-        Error,
-        Fatal
-    }
-    #endregion
-
-    /// <summary>
     /// Сделать "снимок" подключённых клиентов
     /// </summary>
     /// <param name="dict"></param>
@@ -80,4 +67,15 @@ public readonly struct Xe9cLog
         Console.WriteLine();
         _stream.WriteLine();
     }
+}
+
+/// <summary>
+/// Серьёзность событий
+/// </summary>
+public enum LoggingLevel
+{
+    Info,
+    Warning,
+    Error,
+    Fatal
 }
