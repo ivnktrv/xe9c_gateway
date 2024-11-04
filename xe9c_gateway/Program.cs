@@ -7,7 +7,9 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        Xe9c_gateway gateway = new(args[0], args[1], int.Parse(args[2]));
+        Xe9cLog log = new();
+        Xe9c_gateway gateway = new(args[0], args[1], int.Parse(args[2]), log);
+
         if (args[1].Length > 32)
         {
             Console.WriteLine("[-] Длина имени не должна превышать 32 символа");
@@ -31,21 +33,21 @@ internal class Program
             // проверяем, является ли это http подключением
             if (getClientName.Contains("HTTP"))
             {
-                Console.WriteLine($"[{DateTime.Now}] [!] Была попытка подключения по http (полученное имя: {getClientName}). Клиент ({gateway.HideIP(clientSocketAddress)}***) забанен на 1 мин.");
+                log.Logging($"Была попытка подключения по http (полученное имя: {getClientName}). Клиент ({gateway.HideIP(clientSocketAddress)}***) забанен на 1 мин.", Xe9cLog.LoggingLevel.Warning);
                 gateway._bannedIPs.Add(clientSocketAddress);
                 // в бан на 1 минуту
                 Task.Run(() =>
                 {
                     Thread.Sleep(60000);
                     gateway._bannedIPs.Remove(clientSocketAddress);
-                    Console.WriteLine($"[{DateTime.Now}] [i] Клиент разбанен: {gateway.HideIP(clientSocketAddress)}***");
+                    log.Logging($"Клиент разбанен: {gateway.HideIP(clientSocketAddress)}***", Xe9cLog.LoggingLevel.Info);
                 });
                 clientSocket.Close();
                 clientSocket.Dispose();
                 continue;
             }
             gateway.SendGatewayName(clientSocket);
-            Console.WriteLine($"[{DateTime.Now}] [+] Подключён клиент: {getClientName}");
+            log.Logging($"Подключён клиент: {getClientName}", Xe9cLog.LoggingLevel.Info);
             gateway.AddClient(getClientName, clientSocket);
             Task.Run(() => { gateway.HandleClient(clientSocket); });
         }
