@@ -34,7 +34,7 @@ internal class Program
             if (getClientName.Contains("HTTP"))
             {
                 log.Logging(
-                    "Была попытка подключения по http (полученное имя: {getClientName}). Клиент ({gateway.HideIP(clientSocketAddress)}***) забанен на 1 мин.", 
+                    $"Была попытка подключения по http (полученное имя: {getClientName}). Клиент ({gateway.HideIP(clientSocketAddress)}***) забанен на 1 мин.", 
                     LoggingLevel.Warning
                 );
                 gateway._bannedIPs.Add(clientSocketAddress);
