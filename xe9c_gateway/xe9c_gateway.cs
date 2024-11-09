@@ -92,7 +92,9 @@ public class Xe9c_gateway
     /// <param name="client"></param>
     public void RemoveClient(Socket client)
     {
-        _connectedClients.Remove(client);
+        if (_connectedClients.ContainsKey(client))
+            _connectedClients.Remove(client);
+        else _log.Logging($"Клиента в списке не существует", LoggingLevel.Warning);
     }
 
     /// <summary>
